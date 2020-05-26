@@ -32,7 +32,6 @@ def _news_scraper(news_site_uid):
             logger.info('Article fetched!!')
             urls.append(_build_link(host, link))
             articles.append(article)
-            break
 
     _save_articles(news_site_uid, articles, urls)
 
