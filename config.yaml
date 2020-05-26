@@ -1,15 +1,20 @@
+
 news_sites:
   eluniversal:
     url: http://www.eluniversal.com.mx
-    queries:
+    queries: 
       homepage_article_links: '.field-content a'
-      article_body: '.field-name-body'
+      article_body: '.field-name-body p'
       article_title: '.pane-content h1'
   elpais:
     url: https://elpais.com
-    queries:
-      homepage_article_links: ''
-      article_body: ''
-      article_title: ''
-      
-
+    queries: 
+      homepage_article_links: '.headline a'
+      article_body: '.article_body p'
+      article_title: 'div#article_header h1'
+  semana:
+    url: https://www.semana.com
+    queries: 
+      homepage_article_links: '.article-h-link'
+      article_body: 'div#contentItem p'
+      article_title: '.tittleArticuloOpinion'
