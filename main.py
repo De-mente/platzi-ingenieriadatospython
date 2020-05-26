@@ -61,7 +61,9 @@ def _fetch_article(news_site_uid, host, link):
         article = news.ArticlePage(news_site_uid, _build_link(host, link))
     except (HTTPError, MaxRetryError) as e:
         logger.warning('Error while fechting the article', exc_info=False)
-
+    except :
+        logger.warning('Unknown error while fechting the article', exc_info=False)
+ 
 
     if article and not article.body:
         logger.warning('Invalid article. There is no body')
