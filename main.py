@@ -24,35 +24,38 @@ def _news_scraper(news_site_uid):
     homepage = news.HomePage(news_site_uid, host)
 
     articles = []
+    urls = []
     for link in homepage.article_links:
         article = _fetch_article(news_site_uid, host, link)
 
         if article:
             logger.info('Article fetched!!')
+            urls.append(_build_link(host, link))
             articles.append(article)
             break
 
-    _save_articles(news_site_uid, articles)
+    _save_articles(news_site_uid, articles, urls)
 
 
-def _save_articles(news_site_uid, articles):
+def _save_articles(news_site_uid, articles, urls):
     now = datetime.datetime.now().strftime('%Y_%m_%d')
     out_file_name = '{news_site_uid}_{datetime}_articles.csv'.format(
         news_site_uid=news_site_uid,
         datetime=now)
     csv_headers = list(filter(lambda property: not property.startswith('_'), dir(articles[0])))
-    
+
     with open(out_file_name, mode='w+') as f:
         writer = csv.writer(f)
-        writer.writerow(csv_headers)
+        writer.writerow(csv_headers + ['url'])
 
-        for article in articles:
-            row = [str(getattr(article, prop)) for prop in csv_headers]
+        for i in range(len(articles)):
+            row = [str(getattr(articles[i], prop)) for prop in csv_headers]
+            row.append(urls[i])
             writer.writerow(row)
 
 
 def _fetch_article(news_site_uid, host, link):
-    logger.info('Start fetching article at {}'.format(link))
+    logger.info('Start fetching article at {}'.format(_build_link(host, link)))
 
     article = None
     try:
