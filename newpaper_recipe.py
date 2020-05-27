@@ -84,8 +84,27 @@ def _tokenize_column(df, column_name):
     return df
 
 
-def main(filename):
+def _remove_duplicates_entries(df, column_name):
+    logger.info('Removing ducplicate entries')
+    df.drop_duplicates(subset={column_name}, keep='first', inplace=True)
+    return df
+
+
+def _drop_rows_with_missing_data(df):
+    logger.info('Droppping rows with missing values')
+    return df.dropna()
+
+
+def _save_data(df, path, filename):
+    clean_filename = f'{path}clean_{filename}'
+    logger.info(f'Saving data at location: {clean_filename}')
+    df.to_csv(clean_filename)
+
+
+def main(path_filename):
     logger.info('Starting cleaning process')
+    filename = path_filename.split('/')[-1]
+    path = path_filename.replace(filename, '')
     df = _read_data(filename)
     newspaper_uid = _extract_newspaper_uid(filename)
     df = _add_newspaper_uid_column(df, newspaper_uid)
@@ -95,6 +114,9 @@ def main(filename):
     df = _remove_new_lines_from_body(df)
     df = _tokenize_column(df, 'body')
     df = _tokenize_column(df, 'title')
+    df = _remove_duplicates_entries(df, 'title')
+    df = _drop_rows_with_missing_data(df)
+    _save_data(df, path, filename)
     return df
 
 
