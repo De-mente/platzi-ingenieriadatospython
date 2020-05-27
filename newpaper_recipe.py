@@ -4,6 +4,9 @@ logging.basicConfig(level=logging.INFO)
 from urllib.parse import urlparse
 import pandas as pd
 import hashlib
+import nltk 
+from nltk.corpus import stopwords
+STOP_WORDS = set(stopwords.words('spanish'))
 
 
 logger = logging.getLogger(__name__)
@@ -54,7 +57,6 @@ def _generate_uids_for_rows(df):
     return df.set_index('uid')
 
 
-
 def _remove_new_lines_from_body(df):
     logger.info('Removing new lines from body')
     stripped_body = (df
@@ -67,6 +69,21 @@ def _remove_new_lines_from_body(df):
     return df
 
 
+def _tokenize_column(df, column_name):
+    global STOP_WORDS
+    tokenized_column = (df
+            .dropna()
+            .apply(lambda row: nltk.word_tokenize(row[column_name]), axis=1)
+            .apply(lambda tokens: list(filter(lambda token: token.isalpha(), tokens)))
+            .apply(lambda tokens: list(map(lambda token: token.lower(), tokens)))
+            .apply(lambda word_list: list(filter(lambda word: word not in STOP_WORDS, word_list)))
+            .apply(lambda valid_word_list: len(valid_word_list))
+    )
+    tokenized_column_name = 'n_tokens_' + column_name
+    df[tokenized_column_name] = tokenized_column
+    return df
+
+
 def main(filename):
     logger.info('Starting cleaning process')
     df = _read_data(filename)
@@ -76,6 +93,8 @@ def main(filename):
     df = _fill_missings_titles(df)
     df = _generate_uids_for_rows(df)
     df = _remove_new_lines_from_body(df)
+    df = _tokenize_column(df, 'body')
+    df = _tokenize_column(df, 'title')
     return df
 
 
